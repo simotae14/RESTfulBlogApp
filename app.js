@@ -32,7 +32,7 @@ app.get("/", function(req, res) {
    res.redirect("/blogs"); 
 });
 
-// INDEX
+// INDEX ROUTE
 app.get("/blogs", function(req, res){
   // recupero tutti i blog
   Blog.find({}, function(err, blogs){
@@ -40,6 +40,25 @@ app.get("/blogs", function(req, res){
       console.log("ERROR!");
     } else {
       res.render("index", {blogs: blogs});
+    }
+  });
+});
+
+// NEW ROUTE
+app.get("/blogs/new", function(req, res) {
+   res.render("new"); 
+});
+
+// CREATE ROUTE
+app.post("/blogs", function(req,res){
+  // CREO IL BLOG
+  Blog.create(req.body.blog, function(err, newBlog){
+    if(err) {
+      // reindirizzo ancora alla view new
+      res.render("new");
+    } else {
+      // REDIRECT ALL'INDEX
+      res.redirect('/blogs');
     }
   });
 });
