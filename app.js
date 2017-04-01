@@ -1,4 +1,5 @@
 var bodyParser = require("body-parser"),
+methodOverride = require("method-override"),
 mongoose       = require("mongoose"),
 express        = require("express"),
 app            = express();
@@ -13,6 +14,8 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 // uso bodyParser
 app.use(bodyParser.urlencoded({extended: true}));
+// uso methodOverride
+app.use(methodOverride("_method"));
 
 // MONGOOSE/MODEL CONFIG
 // CREO SCHEMA E MODEL DEL BLOG
@@ -71,6 +74,29 @@ app.get("/blogs/:id", function(req, res) {
       res.redirect("/blogs");
     } else {
       res.render("show", { blog: foundBlog });
+    }
+  });
+});
+
+// EDIT ROUTE
+app.get("/blogs/:id/edit", function(req, res) {
+  // RECUPERO IL BLOG
+  Blog.findById(req.params.id, function(err, foundBlog){
+    if(err) {
+      res.redirect("/blogs");
+    } else {
+      res.render("edit", { blog: foundBlog });
+    }
+  });
+});
+
+// UPDATE ROUTE
+app.put("/blogs/:id", function(req, res){
+  Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog){
+    if(err) {
+      res.redirect("/blogs");
+    } else {
+      res.redirect("/blogs/" + req.params.id); 
     }
   });
 });
