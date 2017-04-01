@@ -12,6 +12,12 @@
           <%- blog.body %>
         </p>
       </div>
+      <!-- aggiungo link all'edit -->
+      <a class="ui orange basic button" href="/blogs/<%= blog._id %>/edit">Edit</a>
+      <!-- aggiungo il bottone di cancellazione -->
+      <form id="delete" action="/blogs/<%= blog._id %>?_method=DELETE" method="POST">
+        <button class="ui red basic button">Delete</button>        
+      </form>
     </div>
   </div>
 </div>
