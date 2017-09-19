@@ -1,12 +1,15 @@
-var bodyParser = require("body-parser"),
-methodOverride = require("method-override"),
-mongoose       = require("mongoose"),
-express        = require("express"),
-app            = express();
+var bodyParser   = require("body-parser"),
+methodOverride   = require("method-override"),
+expressSanitizer = require("express-sanitizer"),
+mongoose         = require("mongoose"),
+express          = require("express"),
+app              = express();
 
 // APP CONFIG
 // creo il db
 mongoose.connect("mongodb://localhost/restful_blog_app");
+
+// METODI SPESSO PRESENTI DENTRO OGNI PROGETTO
 // setto le view come ejs
 app.set("view engine", "ejs");
 // setto come cartella per le parti statiche, css, js
@@ -14,17 +17,23 @@ app.set("view engine", "ejs");
 app.use(express.static("public"));
 // uso bodyParser
 app.use(bodyParser.urlencoded({extended: true}));
+// uso expressSanitizer
+app.use(expressSanitizer());
+
 // uso methodOverride
 app.use(methodOverride("_method"));
 
 // MONGOOSE/MODEL CONFIG
 // CREO SCHEMA E MODEL DEL BLOG
 var blogSchema = new mongoose.Schema({
-  title: String,
-  image: String,
-  body: String,
+  titolo: String,
+  immagine: String,
+  corpo: String,
   // creo data
-  created: { type: Date, default: Date.now }
+  creato: { 
+    type: Date, 
+    default: Date.now 
+  }
 });
 // creo model
 var Blog = mongoose.model("Blog", blogSchema);
@@ -40,7 +49,7 @@ app.get("/blogs", function(req, res){
   // recupero tutti i blog
   Blog.find({}, function(err, blogs){
     if(err) {
-      console.log("ERROR!");
+      console.log("ERRORE!");
     } else {
       res.render("index", {blogs: blogs});
     }
@@ -55,6 +64,9 @@ app.get("/blogs/new", function(req, res) {
 // CREATE ROUTE
 app.post("/blogs", function(req,res){
   // CREO IL BLOG
+  // sanitizzo il corpo del post da eventuali script
+  req.body.blog.corpo = req.sanitize(req.body.blog.corpo);
+
   Blog.create(req.body.blog, function(err, newBlog){
     if(err) {
       // reindirizzo ancora alla view new
@@ -92,6 +104,8 @@ app.get("/blogs/:id/edit", function(req, res) {
 
 // UPDATE ROUTE
 app.put("/blogs/:id", function(req, res){
+  // sanitizzo il corpo del post da eventuali script
+  req.body.blog.corpo = req.sanitize(req.body.blog.corpo);
   Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, updatedBlog){
     if(err) {
       res.redirect("/blogs");
@@ -113,5 +127,5 @@ app.delete("/blogs/:id", function(req, res){
 });
 
 app.listen(process.env.PORT, process.env.IP, function(){
-  console.log("SERVER IS RUNNING!");
+  console.log("SERVER IN ESECUZIONE!");
 });
